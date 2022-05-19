@@ -4,6 +4,11 @@ using namespace std;
 //--------------
 const int maxdisp = 5;
 int ndisparos = 0;
+int cont = 0;
+int contt = 0;
+int dsw = 0;
+int dsww = 0;
+
 struct Balas{
    int x, y;
    int dx, dy;
@@ -29,19 +34,48 @@ int main (){
         masked_blit(estructura,buffer,0,0,0,320,1619,495);
         masked_blit(arma_centro,buffer,0,0,725,320,83,48);
 
-        ////rutina de disparos
-       if(key[KEY_SPACE])
+////rutina de disparos
+       if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
        {
          ndisparos++;
          disparos[ndisparos].x = 757;
          disparos[ndisparos].y = 325;
          disparos[ndisparos].dx = 0;
          disparos[ndisparos].dy = -3;
+         dsw ++;
+         dsww++;
         if(ndisparos < maxdisp)
         {
         }
 
+       }//disparos torreta izq
+       else if(key[KEY_SPACE] && !key [KEY_RIGHT] && key [KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+         ndisparos++;
+         disparos[ndisparos].x = 77;
+         disparos[ndisparos].y = 390;
+         disparos[ndisparos].dx = +5;
+         disparos[ndisparos].dy = -3;
+         dsw ++;
+         dsww++;
+       }//Torreta derechaa (corregir las coordenadas de inicio)
+       else if(key[KEY_SPACE] && key [KEY_RIGHT] && !key [KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+         ndisparos++;
+         disparos[ndisparos].x = 1536; //estas también
+         disparos[ndisparos].y = 330; //estas coordenadas
+         disparos[ndisparos].dx = -5;
+         disparos[ndisparos].dy = -3;
+         dsw ++;
+         dsww++;
        }
+       else
+       if (contt++ > 100){
+            dsw = 0; contt =0;
+            if (cont++ > 3){
+                dsww = 0;cont=0;
+            }
+        }
        if(ndisparos > 0)
        {
         for(int cont = 1; cont <= ndisparos; cont++)
