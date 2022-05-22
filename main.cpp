@@ -5,25 +5,24 @@ struct Balas{
     int dx , dy;
 };
 struct ARMAS{
-    //int x,y;
     int n_disp;
     int max_disp;
-    int tick;
-
     BITMAP* img_arma;
     BITMAP* img_bala;
     void inicia(char* ruta_arma, char* ruta_bala);
     void pinta(BITMAP* buffer);
+    void dispara(struct Balas disparos[], BITMAP* buffer);
 };
 void ARMAS::inicia(char* ruta_arma, char* ruta_bala){
     n_disp = 0;
-    max_disp = 5;
+    max_disp = 2;
     img_arma = load_bitmap(ruta_arma, NULL);
     img_bala = load_bitmap(ruta_bala, NULL);
 }
 void ARMAS::pinta(BITMAP* buffer){
     masked_blit(img_arma,buffer,0,0,725,320,83,48);
 }
+
 //---------- Disparos
 void crear_bala(int& n_disparos, const int max_disparos ,struct Balas disparos[] ,
                 const int X, const int Y , const int dx, const int dy)
@@ -38,13 +37,13 @@ void crear_bala(int& n_disparos, const int max_disparos ,struct Balas disparos[]
 }
 
 void pintar_bala(int& n_disparos, const int max_disparos,struct Balas disparos[],
-                 BITMAP* buffer, BITMAP* bala)
+                 BITMAP* buffer, BITMAP* bala, int ancho, int alto)
 {
      if ( n_disparos > 0 && n_disparos < max_disparos){
             for ( int cont = 1; cont <= n_disparos; cont++){
                        disparos[cont].x += disparos[cont].dx;
                        disparos[cont].y += disparos[cont].dy;
-                       masked_blit( bala, buffer, 0, 0, disparos[cont].x, disparos[cont].y, 6, 4);
+                       masked_blit( bala, buffer, 0, 0, disparos[cont].x, disparos[cont].y, ancho, alto);
             }
      }
 }
@@ -67,11 +66,47 @@ void elimina_bala(int& n_disparos, const int max_disparos,struct Balas disparos[
             }
       }
 }
-//---------- Medida de la Pantalla
 
+//---------- Medida de la Pantalla
 #define ANCHO 1620
 #define ALTO  800
-
+//-------------------------------
+void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
+        //----------- Variables
+        int dsw = 0, dsww = 0, contt = 0, cont = 0;
+        //---------- Rutina de disparos
+        if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+           crear_bala(n_disp, max_disp, disparos, 757, 325, 0, -3);
+           dsw++;
+           dsww++;
+       }
+       //---------- disparos torreta izq
+       else if(key[KEY_SPACE] && !key [KEY_RIGHT] && key [KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+           crear_bala(n_disp, max_disp, disparos, 70, 380, 5, -1);
+           dsw++;
+           dsww++;
+       }
+       //---------- Torreta derecha
+       else if(key[KEY_SPACE] && key [KEY_RIGHT] && !key [KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+           crear_bala(n_disp, max_disp, disparos, 1520, 320, -5, -1);
+           dsw++;
+           dsww++;
+       }
+       //----------
+       if (contt++ > 60){
+            dsw = 0; contt = 0;
+            if (cont++ > 6){
+                dsww = 0;
+                cont=0;
+            }
+        }
+       //---------- Pintando y Eliminando la bala
+        pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, 6, 5);
+        elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
+}
 //---------- Audio
 int inicia_audio(int izquierda, int derecha){
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0) {
@@ -80,6 +115,7 @@ int inicia_audio(int izquierda, int derecha){
     }
 	set_volume(izquierda, derecha);
 }
+//---------------------------
 int main(){
     allegro_init();
     install_keyboard();
@@ -102,7 +138,6 @@ int main(){
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
     //----------- Variables
-    int dsw = 0, dsww = 0, contt = 0, cont = 0;
     Balas disparos[N.max_disp];
     //-------------------------
 
@@ -117,48 +152,10 @@ int main(){
         masked_blit(estruc_5,buffer,0,0,555,448,183,57);
         masked_blit(estruc_6,buffer,0,0,370,505,183,57);
 
-        //---------- Rutina de disparos
-        if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
-       {
-           crear_bala(N.n_disp, N.max_disp, disparos, 757, 325, 0, -3);
-           dsw++;
-           dsww++;
-       }
-       //---------- disparos torreta izq
-       else if(key[KEY_SPACE] && !key [KEY_RIGHT] && key [KEY_LEFT] && dsw ==0 && dsww < 2)
-       {
-           crear_bala(N.n_disp, N.max_disp, disparos, 70, 380, 5, -1);
-           dsw++;
-           dsww++;
-       }
-       //---------- Torreta derecha
-       else if(key[KEY_SPACE] && key [KEY_RIGHT] && !key [KEY_LEFT] && dsw ==0 && dsww < 2)
-       {
-           crear_bala(N.n_disp, N.max_disp, disparos, 1520, 320, -5, -1);
-           dsw++;
-           dsww++;
-       }
-       //----------
-       if (contt++ > 60){
-            dsw = 0; contt = 0;
-            if (cont++ > 6){
-                dsww = 0;
-                cont=0;
-            }
-        }
+        N.dispara(disparos, buffer);
 
-       //---------- Pintando y Eliminando la bala
-        pintar_bala(N.n_disp, N.max_disp, disparos, buffer, N.img_bala);
-        elimina_bala(N.n_disp, N.max_disp, disparos, ANCHO, ALTO);
-
-
-
-
-       blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
-       //rest(1);
+        blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
     }
-
-
     destroy_bitmap(buffer);
 	return 0;
 }
