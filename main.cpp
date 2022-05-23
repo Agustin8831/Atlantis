@@ -5,22 +5,31 @@ struct Balas{
     int dx , dy;
 };
 struct ARMAS{
+    int x, y;
     int n_disp;
     int max_disp;
+    int ancho_b, alto_b;
+    int ancho_p, alto_p;
+
     BITMAP* img_arma;
     BITMAP* img_bala;
-    void inicia(char* ruta_arma, char* ruta_bala);
+
+    void inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
+                int _ancho_p, int _alto_p,int _x, int _y);
     void pinta(BITMAP* buffer);
     void dispara(struct Balas disparos[], BITMAP* buffer);
 };
-void ARMAS::inicia(char* ruta_arma, char* ruta_bala){
-    n_disp = 0;
-    max_disp = 2;
+void ARMAS::inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
+                   int _ancho_p, int _alto_p, int _x, int _y){
+    x = _x; y = _y;
+    n_disp = 0; max_disp = 2;
     img_arma = load_bitmap(ruta_arma, NULL);
     img_bala = load_bitmap(ruta_bala, NULL);
+    ancho_b = _ancho_b; alto_b = _alto_b;
+    ancho_p = _ancho_p; alto_p = _alto_p;
 }
 void ARMAS::pinta(BITMAP* buffer){
-    masked_blit(img_arma,buffer,0,0,725,320,83,48);
+    masked_blit(img_arma,buffer,0,0,x,y,ancho_p,alto_p);
 }
 
 //---------- Disparos
@@ -104,7 +113,7 @@ void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
             }
         }
        //---------- Pintando y Eliminando la bala
-        pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, 6, 5);
+        pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
         elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
 }
 //---------- Audio
@@ -125,25 +134,28 @@ int main(){
 
      // Creando los BITMAP
     ARMAS N;
-    BITMAP *estructura = load_bitmap("./img/estructura_juego.bmp", NULL);
-    N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp");
+    N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 320);
+    ARMAS E;
+    E.inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56, 725, 40);
+
+    //----------- Variables
+    Balas disparos[N.max_disp];
+    //Balas disparos_enemigo[E.max_disp];
+    //-------------------------
+
     // Estructuras
+    BITMAP *estructura = load_bitmap("./img/estructura_juego.bmp", NULL);
     BITMAP *estruc_1 = load_bitmap("./img/estruc_1.bmp", NULL);
     BITMAP *estruc_2 = load_bitmap("./img/estruc_2.bmp", NULL);
     BITMAP *estruc_3 = load_bitmap("./img/estruc_3.bmp", NULL);
     BITMAP *estruc_4 = load_bitmap("./img/estruc_4.bmp", NULL);
     BITMAP *estruc_5 = load_bitmap("./img/estruc_5.bmp", NULL);
     BITMAP *estruc_6 = load_bitmap("./img/estruc_6.bmp", NULL);
-    // Naves enemigas
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
-    //----------- Variables
-    Balas disparos[N.max_disp];
-    //-------------------------
 
     while(!key[KEY_ESC]){
         clear_to_color(buffer,0x000000);
-        N.pinta(buffer);
         masked_blit(estructura,buffer,0,0,0,320,1619,495);
         masked_blit(estruc_1,buffer,0,0,148,614,183,57);
         masked_blit(estruc_2,buffer,0,0,755,380,183,57);
@@ -152,7 +164,12 @@ int main(){
         masked_blit(estruc_5,buffer,0,0,555,448,183,57);
         masked_blit(estruc_6,buffer,0,0,370,505,183,57);
 
+
+        N.pinta(buffer);
         N.dispara(disparos, buffer);
+
+        E.pinta(buffer);
+        //E.dispara(disparos_enemigo,buffer);
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
     }
