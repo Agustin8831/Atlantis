@@ -1,6 +1,8 @@
 # depslib dependency file v1.0
-1653263673 source:d:\agusrtin perez\escritorio\proyecto\c++\atlantis\atlantis\main.cpp
+1653347773 source:d:\agusrtin perez\escritorio\proyecto\c++\atlantis\atlantis\main.cpp
 	<allegro.h>
+	<stdlib.h>
+	<time.h>
 
 1653190006 d:\agusrtin perez\escritorio\proyecto\c++\atlantis\atlantis\inicia-atlantis.h
 

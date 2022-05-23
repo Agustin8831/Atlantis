@@ -1,4 +1,6 @@
 #include <allegro.h>
+#include <stdlib.h>
+#include <time.h>
 //---------- Estructuras
 struct Balas{
     int x , y;
@@ -18,6 +20,7 @@ struct ARMAS{
                 int _ancho_p, int _alto_p,int _x, int _y);
     void pinta(BITMAP* buffer);
     void dispara(struct Balas disparos[], BITMAP* buffer);
+    void dispara_E(struct Balas disparos[], BITMAP* buffer);
 };
 void ARMAS::inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
                    int _ancho_p, int _alto_p, int _x, int _y){
@@ -86,7 +89,7 @@ void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
         //---------- Rutina de disparos
         if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
        {
-           crear_bala(n_disp, max_disp, disparos, 757, 325, 0, -3);
+           crear_bala(n_disp, max_disp, disparos, 757, 325, 0, -2);
            dsw++;
            dsww++;
        }
@@ -116,6 +119,30 @@ void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
         pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
         elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
 }
+void ARMAS::dispara_E(struct Balas disparos[], BITMAP* buffer){
+        crear_bala(n_disp, max_disp, disparos, x + 80, y + 40, 0, 1);
+        pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
+        elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
+}
+//---------- Crear y Pintar todos los enemigos
+void acomoda_enemigos(struct ARMAS E[]){
+    int indice = -1;
+    for(int i = 0; i < 1; i++){
+            for(int j = 0; j < 6; j++){
+                indice++;
+                E[indice].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56, 140 + j * 200, 100 + i * 100);
+            }
+    }
+}
+void pintar_enemigo(struct ARMAS E[], BITMAP* buffer){
+    int indice = -1;
+    for(int i = 0; i < 1; i++){
+            for(int j = 0; j < 6; j++){
+                indice++;
+                E[indice].pinta(buffer);
+            }
+    }
+}
 //---------- Audio
 int inicia_audio(int izquierda, int derecha){
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0) {
@@ -126,22 +153,26 @@ int inicia_audio(int izquierda, int derecha){
 }
 //---------------------------
 int main(){
+    srand(time(NULL));
     allegro_init();
     install_keyboard();
     set_color_depth(32);
     set_gfx_mode(GFX_AUTODETECT_WINDOWED, ANCHO, ALTO, 0, 0);
 	inicia_audio(70,70);
 
-     // Creando los BITMAP
+    int azar = rand() % 6;
+
+    // Creando los BITMAP
     ARMAS N;
     N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 320);
-    ARMAS E;
-    E.inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56, 725, 40);
 
-    //----------- Variables
+    ARMAS E[6];
+    acomoda_enemigos(E);
+
     Balas disparos[N.max_disp];
-    //Balas disparos_enemigo[E.max_disp];
+    Balas disp_E[E[0].max_disp];
     //-------------------------
+
 
     // Estructuras
     BITMAP *estructura = load_bitmap("./img/estructura_juego.bmp", NULL);
@@ -168,8 +199,11 @@ int main(){
         N.pinta(buffer);
         N.dispara(disparos, buffer);
 
-        E.pinta(buffer);
-        //E.dispara(disparos_enemigo,buffer);
+        pintar_enemigo(E, buffer);
+        if(E[azar].n_disp == 0){
+            azar = rand() % 6;
+        }
+        E[azar].dispara_E(disp_E, buffer);
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
     }
