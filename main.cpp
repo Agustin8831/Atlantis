@@ -12,30 +12,37 @@ struct ARMAS{
     int max_disp;
     int ancho_b, alto_b;
     int ancho_p, alto_p;
+    int vida;
 
     BITMAP* img_arma;
     BITMAP* img_bala;
 
     void inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
-                int _ancho_p, int _alto_p,int _x, int _y);
+                int _ancho_p, int _alto_p,int _x, int _y, int _vida);
     void pinta(BITMAP* buffer);
     void dispara(struct Balas disparos[], BITMAP* buffer);
     void dispara_E(struct Balas disparos[], BITMAP* buffer);
 };
 void ARMAS::inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
-                   int _ancho_p, int _alto_p, int _x, int _y){
+                   int _ancho_p, int _alto_p, int _x, int _y, int _vida){
     x = _x; y = _y;
     n_disp = 0; max_disp = 2;
     img_arma = load_bitmap(ruta_arma, NULL);
     img_bala = load_bitmap(ruta_bala, NULL);
     ancho_b = _ancho_b; alto_b = _alto_b;
     ancho_p = _ancho_p; alto_p = _alto_p;
+    vida = _vida;
 }
 void ARMAS::pinta(BITMAP* buffer){
     masked_blit(img_arma,buffer,0,0,x,y,ancho_p,alto_p);
 }
 
 //---------- Disparos
+bool colision(int x1, int y1, int w1 , int h1,
+              int x2, int y2, int w2 , int h2){
+    return ((x1 < x2 + w2)&&(x2 < x1 + w1)&&(y1<y2+h2)&&(y2<y1+h1));
+}
+
 void crear_bala(int& n_disparos, const int max_disparos ,struct Balas disparos[] ,
                 const int X, const int Y , const int dx, const int dy)
 {
@@ -60,25 +67,40 @@ void pintar_bala(int& n_disparos, const int max_disparos,struct Balas disparos[]
      }
 }
 
+void eliminar(struct Balas disparos[], int& n_disparos, int cont){
+    Balas Btemp;
+    Btemp = disparos[cont];
+    disparos[cont] = disparos[n_disparos];
+    disparos[n_disparos] = Btemp;
+    n_disparos--;
+    if ( n_disparos < 0 ) n_disparos=0;
+}
+
 void elimina_bala(int& n_disparos, const int max_disparos,struct Balas disparos[],
                   const int ANCHO, const int ALTO)
 {
-      Balas Btemp;
+
       if ( n_disparos > 0 && n_disparos < max_disparos){
             for ( int cont = 1; cont <= n_disparos; cont++){
                       if ( disparos[cont].y > ALTO || disparos[cont].y < 0 ||
                            disparos[cont].x > ANCHO|| disparos[cont].x < 0  )
                        {
-                                Btemp = disparos[cont];
-                                disparos[cont] = disparos[n_disparos];
-                                disparos[n_disparos] = Btemp;
-                                n_disparos--;
-                                if ( n_disparos < 0 ) n_disparos=0;
+                           eliminar(disparos, n_disparos, cont);
                        }
             }
       }
 }
 
+void elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
+    if ( N.n_disp > 0 && N.n_disp < N.max_disp){
+            for ( int cont = 1; cont <= N.n_disp; cont++){
+                if(colision(E.x, E.y, E.ancho_p, E.alto_p, B[cont].x , B[cont].y, N.ancho_b, N.alto_b)&& E.vida > 0){
+                    eliminar(B,N.n_disp,cont);
+                    E.vida--;
+                }
+            }
+    }
+}
 //---------- Medida de la Pantalla
 #define ANCHO 1620
 #define ALTO  800
@@ -130,7 +152,7 @@ void acomoda_enemigos(struct ARMAS E[]){
     for(int i = 0; i < 1; i++){
             for(int j = 0; j < 6; j++){
                 indice++;
-                E[indice].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56, 140 + j * 200, 100 + i * 100);
+                E[indice].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56, 100 + j * 200, 100 + i * 100, 1);
             }
     }
 }
@@ -139,7 +161,9 @@ void pintar_enemigo(struct ARMAS E[], BITMAP* buffer){
     for(int i = 0; i < 1; i++){
             for(int j = 0; j < 6; j++){
                 indice++;
-                E[indice].pinta(buffer);
+                if(E[indice].vida > 0){
+                    E[indice].pinta(buffer);
+                }
             }
     }
 }
@@ -164,7 +188,7 @@ int main(){
 
     // Creando los BITMAP
     ARMAS N;
-    N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 320);
+    N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 320, 1);
 
     ARMAS E[6];
     acomoda_enemigos(E);
@@ -199,10 +223,14 @@ int main(){
         N.pinta(buffer);
         N.dispara(disparos, buffer);
 
-        pintar_enemigo(E, buffer);
-        if(E[azar].n_disp == 0){
-            azar = rand() % 6;
+        for(int i = 0; i < 6; i++){
+            elimina_bala_objeto(N,E[i],disparos);
         }
+
+        pintar_enemigo(E, buffer);
+        //if(E[azar].n_disp == 0){
+        //    azar = rand() % 6;
+        //}
         E[azar].dispara_E(disp_E, buffer);
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
