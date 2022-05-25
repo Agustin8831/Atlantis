@@ -196,40 +196,6 @@ void explosion_2(struct ARMAS N, BITMAP* buffer){
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
     rest(200);
 }
-struct escudo {
-    int dan;
-};
-void iniciar_escudo(struct escudo muros[]){
-    int r = 0;
-    for(int i = 0; i < 6; i++){
-        muros[r].dan = 0;
-        r++;
-    }
-};
-void pintar_escudo(struct escudo ES[], BITMAP* buffer,
-                   BITMAP* edif_1,BITMAP* edif_2,BITMAP* edif_3,
-                   BITMAP* edif_4,BITMAP* edif_5,BITMAP* edif_6){
-    for(int i = 0; i < 6; i++){
-        if(ES[i].dan != 1){
-            masked_blit(edif_1,buffer,0,0,148,805,183,57);
-        }
-        if(ES[i].dan != 1){
-            masked_blit(edif_2,buffer,0,0,755,570,183,57);
-        }
-        if(ES[i].dan != 1){
-            masked_blit(edif_3,buffer, 0, 0, 962,750,183,57);
-        }
-        if(ES[i].dan != 1){
-            masked_blit(edif_4,buffer,0,0,1355,638,183,57);
-        }
-        if(ES[i].dan != 1){
-            masked_blit(edif_5,buffer,0,0,555,638,183,57);
-        }
-        if(ES[i].dan != 1){
-            masked_blit(edif_6,buffer,0,0,370,695,183,57);
-        }
-    }
-}
 //---------- Audio
 int inicia_audio(int izquierda, int derecha){
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0) {
@@ -269,13 +235,16 @@ int main(){
 
     Balas disparos[N.max_disp];
     Balas disp_E[E[0].max_disp];
-    escudo ES[7];
-    iniciar_escudo(ES);
     //-------------------------
     while(!key[KEY_ESC]){
         clear_to_color(buffer,0x000000);
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
-        pintar_escudo(ES,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
+        masked_blit(estruc_1,buffer,0,0,148,805,183,57);
+        masked_blit(estruc_2,buffer,0,0,755,570,183,57);
+        masked_blit(estruc_3,buffer,0, 0, 962,750,183,57);
+        masked_blit(estruc_4,buffer,0,0,1355,638,183,57);
+        masked_blit(estruc_5,buffer,0,0,555,638,183,57);
+        masked_blit(estruc_6,buffer,0,0,370,695,183,57);
 
         N.pinta(buffer);
         N.dispara(disparos, buffer);
