@@ -85,7 +85,6 @@ void eliminar(struct Balas disparos[], int& n_disparos, int cont){
 void elimina_bala(int& n_disparos, const int max_disparos,struct Balas disparos[],
                   const int ANCHO, const int ALTO)
 {
-
       if ( n_disparos > 0 && n_disparos < max_disparos){
             for ( int cont = 1; cont <= n_disparos; cont++){
                       if ( disparos[cont].y > ALTO || disparos[cont].y < 0 ||
@@ -96,7 +95,7 @@ void elimina_bala(int& n_disparos, const int max_disparos,struct Balas disparos[
             }
       }
 }
-
+//------- Eliminador de naves enemigas
 bool elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
     if ( N.n_disp > 0 && N.n_disp < N.max_disp){
             for ( int cont = 1; cont <= N.n_disp; cont++){
@@ -109,31 +108,34 @@ bool elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
             return false;
     }
 }
+//------- Eliminador de estructuras
 //---------- Medida de la Pantalla
 #define ANCHO 1620
 #define ALTO  1000
-//-------------------------------
+
+
+//----------- Dispara
 void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
         //----------- Variables
         int dsw = 0, dsww = 0, contt = 0, cont = 0;
         //---------- Rutina de disparos
         if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
        {
-           crear_bala(n_disp, max_disp, disparos, 757, 325, 0, -2);
+           crear_bala(n_disp, max_disp, disparos, 757, 510, 0, -2);
            dsw++;
            dsww++;
        }
        //---------- disparos torreta izq
        else if(key[KEY_SPACE] && !key [KEY_RIGHT] && key [KEY_LEFT] && dsw ==0 && dsww < 2)
        {
-           crear_bala(n_disp, max_disp, disparos, 70, 380, 5, -1);
+           crear_bala(n_disp, max_disp, disparos, 100, 570, 3, -1);
            dsw++;
            dsww++;
        }
        //---------- Torreta derecha
        else if(key[KEY_SPACE] && key [KEY_RIGHT] && !key [KEY_LEFT] && dsw ==0 && dsww < 2)
        {
-           crear_bala(n_disp, max_disp, disparos, 1520, 320, -5, -1);
+           crear_bala(n_disp, max_disp, disparos, 1520, 510, -3, -1);
            dsw++;
            dsww++;
        }
@@ -154,15 +156,34 @@ void ARMAS::dispara_E(struct Balas disparos[], BITMAP* buffer){
         pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
         elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
 }
+
+
+//-------------- Eliminando Y Crear Estructuras
+void acomoda_estructuras(struct ARMAS Estruc[]){
+    Estruc[0].inicia("./img/estruc_1.bmp","", 0, 0,183,57,148,805,1);
+    Estruc[1].inicia("./img/estruc_2.bmp","", 0, 0,183,57,755,570,1);
+    Estruc[2].inicia("./img/estruc_3.bmp","", 0, 0,183,57,962,750,1);
+    Estruc[3].inicia("./img/estruc_4.bmp","", 0, 0,183,57,1355,638,1);
+    Estruc[4].inicia("./img/estruc_5.bmp","", 0, 0,183,57,555,638,1);
+    Estruc[5].inicia("./img/estruc_6.bmp","", 0, 0,183,57,370,695,1);
+}
+void pintar_estructuras(struct ARMAS E[], BITMAP* buffer){
+    for(int i = 0; i < 6; i++){
+        if(E[i].vida > 0){
+            E[i].pinta(buffer);
+        }
+    }
+}
+
+
 //---------- Crear y Pintar todos los enemigos
 void acomoda_enemigos(struct ARMAS E[]){
-    int indice = -1;
-    for(int i = 0; i < 1; i++){
-            for(int j = 0; j < 6; j++){
-                indice++;
-                E[indice].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56, 280 + j * 200, 100 + i * 100, 1);
-            }
-    }
+    E[0].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,100,100, 1);
+    E[1].inicia("./img/nave_2.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,300,50, 1);
+    E[2].inicia("./img/nave_3.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,400,300, 1);
+    E[3].inicia("./img/nave_4.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1000,220, 1);
+    E[4].inicia("./img/nave_5.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1300,420, 1);
+    E[5].inicia("./img/nave_6.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1400,80, 1);
 }
 void pintar_enemigo(struct ARMAS E[], BITMAP* buffer){
     int indice = -1;
@@ -196,6 +217,17 @@ void explosion_2(struct ARMAS N, BITMAP* buffer){
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
     rest(200);
 }
+void explosion_3(struct ARMAS Estruc, BITMAP* buffer){
+    BITMAP* parche = create_bitmap(183,57);
+    clear_to_color(parche,0x000000);
+    blit(parche, buffer, 0 , 0, Estruc.x, Estruc.y,183,57);
+    masked_blit(Estruc.exp_enem_1, buffer, 0, 0, Estruc.x , Estruc.y, 135, 58);
+    masked_blit(Estruc.exp_enem_2, buffer, 0, 0, Estruc.x , Estruc.y, 135, 58);
+    masked_blit(Estruc.exp_enem_3, buffer, 0, 0, Estruc.x , Estruc.y, 135, 58);
+    blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
+    rest(200);
+}
+
 //---------- Audio
 int inicia_audio(int izquierda, int derecha){
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0) {
@@ -233,21 +265,22 @@ int main(){
     ARMAS E[6];
     acomoda_enemigos(E);
 
+    ARMAS Estruc[6];
+    acomoda_estructuras(Estruc);
+
     Balas disparos[N.max_disp];
     Balas disp_E[E[0].max_disp];
     //-------------------------
     while(!key[KEY_ESC]){
         clear_to_color(buffer,0x000000);
+
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
-        masked_blit(estruc_1,buffer,0,0,148,805,183,57);
-        masked_blit(estruc_2,buffer,0,0,755,570,183,57);
-        masked_blit(estruc_3,buffer,0, 0, 962,750,183,57);
-        masked_blit(estruc_4,buffer,0,0,1355,638,183,57);
-        masked_blit(estruc_5,buffer,0,0,555,638,183,57);
-        masked_blit(estruc_6,buffer,0,0,370,695,183,57);
+        pintar_estructuras(Estruc, buffer);
+
 
         N.pinta(buffer);
         N.dispara(disparos, buffer);
+        pintar_enemigo(E, buffer);
 
         for(int i = 0; i < 6; i++){
                 if(elimina_bala_objeto(N,E[i],disparos)){
@@ -255,11 +288,14 @@ int main(){
                 }
         }
 
-        pintar_enemigo(E, buffer);
+
+
         if(E[azar].n_disp == 0){
             azar = rand() % 6;
         }
+
         E[azar].dispara_E(disp_E, buffer);
+
         if(elimina_bala_objeto(E[azar], N, disp_E)){
             explosion_2(N,buffer);
         }
