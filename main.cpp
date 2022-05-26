@@ -99,7 +99,8 @@ void elimina_bala(int& n_disparos, const int max_disparos,struct Balas disparos[
 bool elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
     if ( N.n_disp > 0 && N.n_disp < N.max_disp){
             for ( int cont = 1; cont <= N.n_disp; cont++){
-                if(colision(E.x, E.y, E.ancho_p, E.alto_p, B[cont].x , B[cont].y, N.ancho_b, N.alto_b)&& E.vida > 0){
+                if(colision(E.x, E.y, E.ancho_p, E.alto_p,
+                            B[cont].x , B[cont].y, N.ancho_b, N.alto_b)&& E.vida > 0){
                     eliminar(B,N.n_disp,cont);
                     E.vida--;
                     return true;
@@ -108,11 +109,9 @@ bool elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
             return false;
     }
 }
-//------- Eliminador de estructuras
 //---------- Medida de la Pantalla
 #define ANCHO 1620
 #define ALTO  1000
-
 
 //----------- Dispara
 void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
@@ -156,26 +155,75 @@ void ARMAS::dispara_E(struct Balas disparos[], BITMAP* buffer){
         pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
         elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
 }
-
-
 //-------------- Eliminando Y Crear Estructuras
-void acomoda_estructuras(struct ARMAS Estruc[]){
-    Estruc[0].inicia("./img/estruc_1.bmp","", 0, 0,183,57,148,805,1);
-    Estruc[1].inicia("./img/estruc_2.bmp","", 0, 0,183,57,755,570,1);
-    Estruc[2].inicia("./img/estruc_3.bmp","", 0, 0,183,57,962,750,1);
-    Estruc[3].inicia("./img/estruc_4.bmp","", 0, 0,183,57,1355,638,1);
-    Estruc[4].inicia("./img/estruc_5.bmp","", 0, 0,183,57,555,638,1);
-    Estruc[5].inicia("./img/estruc_6.bmp","", 0, 0,183,57,370,695,1);
-}
-void pintar_estructuras(struct ARMAS E[], BITMAP* buffer){
+struct estructuras {
+    int dan;
+};
+void iniciar_estructuras (struct estructuras edificios[]){
     for(int i = 0; i < 6; i++){
-        if(E[i].vida > 0){
-            E[i].pinta(buffer);
+        edificios[i].dan = 0;
+    };
+};
+void pintar_estructuras(struct estructuras Edi[],BITMAP* buffer,
+                        BITMAP* estruc_1,BITMAP* estruc_2,BITMAP* estruc_3,
+                        BITMAP* estruc_4,BITMAP* estruc_5,BITMAP* estruc_6){
+
+    if(Edi[0].dan != 1){
+        masked_blit(estruc_1,buffer,0,0,148,805,183,57);
+    }
+    if(Edi[1].dan != 1){
+        masked_blit(estruc_2,buffer,0,0,755,570,183,57);
+    }
+    if(Edi[2].dan != 1){
+        masked_blit(estruc_3,buffer,0, 0, 962,750,183,57);
+    }
+    if(Edi[3].dan != 1){
+        masked_blit(estruc_4,buffer,0,0,1355,638,183,57);
+    }
+    if(Edi[4].dan != 1){
+        masked_blit(estruc_5,buffer,0,0,555,638,183,57);
+    }
+    if(Edi[5].dan != 1){
+        masked_blit(estruc_6,buffer,0,0,370,695,183,57);
+    }
+}
+//------- Eliminador de estructuras
+void elimina_bala_estructuras(struct ARMAS &N, struct estructuras Edi[], struct Balas B[]){
+    if ( N.n_disp > 0 && N.n_disp < N.max_disp){
+        for ( int cont = 1; cont <= N.n_disp; cont++){
+            if(colision(148,805,183,57,B[cont].x, B[cont].y,
+                N.ancho_b, N.alto_b) && Edi[0].dan < 1){
+                eliminar(B,N.n_disp,cont);
+                Edi[0].dan++;
+            }
+            if(colision(755,570,183,57,B[cont].x, B[cont].y,
+                N.ancho_b, N.alto_b) && Edi[1].dan < 1){
+                eliminar(B,N.n_disp,cont);
+                Edi[1].dan++;
+            }
+            if(colision(962,750,183,57,B[cont].x, B[cont].y,
+                N.ancho_b, N.alto_b) && Edi[2].dan < 1){
+                eliminar(B,N.n_disp,cont);
+                Edi[2].dan++;
+            }
+            if(colision(1355,638,183,57,B[cont].x, B[cont].y,
+                N.ancho_b, N.alto_b) && Edi[3].dan < 1){
+                eliminar(B,N.n_disp,cont);
+                Edi[3].dan++;
+            }
+            if(colision(555,638,183,57,B[cont].x, B[cont].y,
+                N.ancho_b, N.alto_b) && Edi[4].dan < 1){
+                eliminar(B,N.n_disp,cont);
+                Edi[4].dan++;
+            }
+            if(colision(370,695,183,57,B[cont].x, B[cont].y,
+                N.ancho_b, N.alto_b) && Edi[5].dan < 1){
+                eliminar(B,N.n_disp,cont);
+                Edi[5].dan++;
+            }
         }
     }
 }
-
-
 //---------- Crear y Pintar todos los enemigos
 void acomoda_enemigos(struct ARMAS E[]){
     E[0].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,100,100, 1);
@@ -246,13 +294,13 @@ int main(){
 	inicia_audio(70,70);
 
 	// Estructuras
+	BITMAP* estruc_1 = load_bitmap("./img/estruc_1.bmp", NULL);
+    BITMAP* estruc_2 = load_bitmap("./img/estruc_2.bmp", NULL);
+    BITMAP* estruc_3 = load_bitmap("./img/estruc_3.bmp", NULL);
+    BITMAP* estruc_4 = load_bitmap("./img/estruc_4.bmp", NULL);
+    BITMAP* estruc_5 = load_bitmap("./img/estruc_5.bmp", NULL);
+    BITMAP* estruc_6 = load_bitmap("./img/estruc_6.bmp", NULL);
     BITMAP *estructura = load_bitmap("./img/estructura_juego.bmp", NULL);
-    BITMAP *estruc_1 = load_bitmap("./img/estruc_1.bmp", NULL);
-    BITMAP *estruc_2 = load_bitmap("./img/estruc_2.bmp", NULL);
-    BITMAP *estruc_3 = load_bitmap("./img/estruc_3.bmp", NULL);
-    BITMAP *estruc_4 = load_bitmap("./img/estruc_4.bmp", NULL);
-    BITMAP *estruc_5 = load_bitmap("./img/estruc_5.bmp", NULL);
-    BITMAP *estruc_6 = load_bitmap("./img/estruc_6.bmp", NULL);
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
 
@@ -266,21 +314,22 @@ int main(){
     acomoda_enemigos(E);
 
     ARMAS Estruc[6];
-    acomoda_estructuras(Estruc);
 
     Balas disparos[N.max_disp];
     Balas disp_E[E[0].max_disp];
+
+    estructuras Edi[7];
+    iniciar_estructuras(Edi);
     //-------------------------
     while(!key[KEY_ESC]){
         clear_to_color(buffer,0x000000);
-
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
-        pintar_estructuras(Estruc, buffer);
-
 
         N.pinta(buffer);
         N.dispara(disparos, buffer);
         pintar_enemigo(E, buffer);
+
+        pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
 
         for(int i = 0; i < 6; i++){
                 if(elimina_bala_objeto(N,E[i],disparos)){
@@ -288,17 +337,18 @@ int main(){
                 }
         }
 
-
-
-        if(E[azar].n_disp == 0){
-            azar = rand() % 6;
-        }
-
-        E[azar].dispara_E(disp_E, buffer);
+        elimina_bala_estructuras(N,Edi,disparos);
 
         if(elimina_bala_objeto(E[azar], N, disp_E)){
             explosion_2(N,buffer);
         }
+        elimina_bala_estructuras(E[azar],Edi,disp_E);
+
+        if(E[azar].n_disp == 0){
+            azar = rand() % 6;
+        }
+        E[azar].dispara_E(disp_E, buffer);
+
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
     }
