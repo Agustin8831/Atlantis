@@ -354,12 +354,12 @@ int main(){
     int azar = rand() % 6;
     float dificultad = 0;
     float distancia = 1000;
-    float dir_1 = 1 + rand() % 14;
-    float dir_2 = 1 + rand() % 14;
-    float dir_3 = 1 + rand() % 14;
-    float dir_4 = 1 + rand() % 14;
-    float dir_5 = 1 + rand() % 14;
-    float dir_6 = 1 + rand() % 14;
+    float dir_1 = 1 + rand() % 4;
+    float dir_2 = 1 + rand() % 4;
+    float dir_3 = 1 + rand() % 4;
+    float dir_4 = 1 + rand() % 4;
+    float dir_5 = 1 + rand() % 4;
+    float dir_6 = 1 + rand() % 4;
 
     ARMAS N;
     N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 515, 1);
@@ -375,8 +375,9 @@ int main(){
     estructuras Edi[7];
     iniciar_estructuras(Edi);
 
+
     //-------------------------
-    bool salida = false;
+     bool salida = false;
             while (!salida){
             clear_to_color(buffer,0x000000);
             masked_blit(estructura,buffer,0,0,0,510,1619,495);
@@ -404,7 +405,6 @@ int main(){
         clear_to_color(buffer,0x000000);
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
 
-
         mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, dificultad, distancia);
 
         N.pinta(buffer);
@@ -413,6 +413,7 @@ int main(){
         pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
         pintar_enemigo(E, buffer);
         crear_bala_enemigo(E,azar);
+
         for(int i = 0; i < 6; i++){
                 if(elimina_bala_objeto(N,E[i],disparos)){
                     explosion_1(E[i], buffer);
