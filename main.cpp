@@ -1,13 +1,16 @@
 #include <allegro.h>
 #include <stdlib.h>
+#include <iostream>
 #include <time.h>
+using namespace std;
+
 //---------- Estructuras
 struct Balas{
     int x , y;
     int dx , dy;
 };
 struct ARMAS{
-    int x, y;
+    float x, y;
     int n_disp;
     int max_disp;
     int ancho_b, alto_b;
@@ -23,7 +26,6 @@ struct ARMAS{
     void inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
                 int _ancho_p, int _alto_p,int _x, int _y, int _vida);
     void pinta(BITMAP* buffer);
-    void dispara(struct Balas disparos[], BITMAP* buffer);
     void dispara_E(struct Balas disparos[], BITMAP* buffer);
 };
 void ARMAS::inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
@@ -113,43 +115,7 @@ bool elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
 #define ANCHO 1620
 #define ALTO  1000
 
-//----------- Dispara
-void ARMAS::dispara(struct Balas disparos[], BITMAP* buffer){
-        //----------- Variables
-        int dsw = 0, dsww = 0, contt = 0, cont = 0;
-        //---------- Rutina de disparos
-        if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
-       {
-           crear_bala(n_disp, max_disp, disparos, 757, 510, 0, -2);
-           dsw++;
-           dsww++;
-       }
-       //---------- disparos torreta izq
-       else if(key[KEY_SPACE] && !key [KEY_RIGHT] && key [KEY_LEFT] && dsw ==0 && dsww < 2)
-       {
-           crear_bala(n_disp, max_disp, disparos, 100, 570, 3, -1);
-           dsw++;
-           dsww++;
-       }
-       //---------- Torreta derecha
-       else if(key[KEY_SPACE] && key [KEY_RIGHT] && !key [KEY_LEFT] && dsw ==0 && dsww < 2)
-       {
-           crear_bala(n_disp, max_disp, disparos, 1520, 510, -3, -1);
-           dsw++;
-           dsww++;
-       }
-       //----------
-       if (contt++ > 60){
-            dsw = 0; contt = 0;
-            if (cont++ > 6){
-                dsww = 0;
-                cont=0;
-            }
-        }
-       //---------- Pintando y Eliminando la bala
-        pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
-        elimina_bala(n_disp, max_disp, disparos, ANCHO, ALTO);
-}
+//----------- Dispara Enemigo
 void ARMAS::dispara_E(struct Balas disparos[], BITMAP* buffer){
         crear_bala(n_disp, max_disp, disparos, x + 80, y + 40, 0, 1);
         pintar_bala(n_disp, max_disp, disparos, buffer, img_bala, ancho_b, alto_b);
@@ -226,12 +192,12 @@ void elimina_bala_estructuras(struct ARMAS &N, struct estructuras Edi[], struct 
 }
 //---------- Crear y Pintar todos los enemigos
 void acomoda_enemigos(struct ARMAS E[]){
-    E[0].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,100,100, 1);
-    E[1].inicia("./img/nave_2.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,300,50, 1);
-    E[2].inicia("./img/nave_3.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,400,300, 1);
-    E[3].inicia("./img/nave_4.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1000,220, 1);
-    E[4].inicia("./img/nave_5.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1300,420, 1);
-    E[5].inicia("./img/nave_6.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1400,80, 1);
+    E[0].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-6000,0, 1);
+    E[1].inicia("./img/nave_2.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,3000,70, 1);
+    E[2].inicia("./img/nave_3.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2000,140, 1);
+    E[3].inicia("./img/nave_4.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,4600,210, 1);
+    E[4].inicia("./img/nave_5.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2600,280, 1);
+    E[5].inicia("./img/nave_6.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1900,350, 1);
 }
 void pintar_enemigo(struct ARMAS E[], BITMAP* buffer){
     int indice = -1;
@@ -253,7 +219,7 @@ void explosion_1(struct ARMAS E, BITMAP* buffer){
     masked_blit(E.exp_enem_2, buffer, 0, 0, E.x - 10, E.y, 135, 58);
     masked_blit(E.exp_enem_3, buffer, 0, 0, E.x - 10, E.y, 135, 58);
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
-    rest(50);
+    rest(20);
 }
 void explosion_2(struct ARMAS N, BITMAP* buffer){
     BITMAP* parche = create_bitmap(83, 48);
@@ -265,17 +231,50 @@ void explosion_2(struct ARMAS N, BITMAP* buffer){
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
     rest(200);
 }
-void explosion_3(struct ARMAS Estruc, BITMAP* buffer){
-    BITMAP* parche = create_bitmap(183,57);
-    clear_to_color(parche,0x000000);
-    blit(parche, buffer, 0 , 0, Estruc.x, Estruc.y,183,57);
-    masked_blit(Estruc.exp_enem_1, buffer, 0, 0, Estruc.x , Estruc.y, 135, 58);
-    masked_blit(Estruc.exp_enem_2, buffer, 0, 0, Estruc.x , Estruc.y, 135, 58);
-    masked_blit(Estruc.exp_enem_3, buffer, 0, 0, Estruc.x , Estruc.y, 135, 58);
-    blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
-    rest(200);
+void crear_bala_enemigo(struct ARMAS E[], int &azar){
+    if(E[azar].n_disp == 0){
+        azar = rand() % 6;
+        while(E[azar].vida == 0){
+            azar = rand() % 6;
+        }
+    }
 }
-
+void crear_bala_nave(struct ARMAS& N, struct Balas disparos[],BITMAP* buffer){
+    //----------- Variables
+    int dsw = 0, dsww = 0, contt = 0, cont = 0;
+    //---------- Rutina de disparos
+     if(key[KEY_SPACE] && !key[KEY_RIGHT] && !key[KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+           crear_bala(N.n_disp, N.max_disp, disparos, 757, 510, 0, -2);
+           dsw++;
+           dsww++;
+       }
+       //---------- disparos torreta izq
+       else if(key[KEY_SPACE] && !key [KEY_RIGHT] && key [KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+           crear_bala(N.n_disp, N.max_disp, disparos, 100, 570, 3, -1);
+           dsw++;
+           dsww++;
+       }
+       //---------- Torreta derecha
+       else if(key[KEY_SPACE] && key [KEY_RIGHT] && !key [KEY_LEFT] && dsw ==0 && dsww < 2)
+       {
+           crear_bala(N.n_disp, N.max_disp, disparos, 1520, 510, -3, -1);
+           dsw++;
+           dsww++;
+       }
+       //----------
+       if (contt++ > 60){
+            dsw = 0; contt = 0;
+            if (cont++ > 6){
+                dsww = 0;
+                cont =0;
+            }
+        }
+       //---------- Pintando y Eliminando la bala
+        pintar_bala(N.n_disp, N.max_disp, disparos, buffer, N.img_bala, N.ancho_b, N.alto_b);
+        elimina_bala(N.n_disp, N.max_disp, disparos, ANCHO, ALTO);
+}
 //---------- Audio
 int inicia_audio(int izquierda, int derecha){
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0) {
@@ -284,6 +283,51 @@ int inicia_audio(int izquierda, int derecha){
     }
 	set_volume(izquierda, derecha);
 }
+
+
+bool limites(struct ARMAS E[], int& dir){
+    for(int i = 0; i< 6; i++){
+        if(E[i].x > 520 || E[i].x < 50){
+            dir = -1 * dir;
+            return true;
+        }
+    }
+    return false;
+}
+void mover_enemigos(struct ARMAS E[],
+    float dir_1, float dir_2,float dir_3,
+    float dir_4,float dir_5,float dir_6, float dificultad, float distancia){
+    for(int i = 0; i< 7; i++){
+        E[0].x += (dir_1 + dificultad) / 10 ;
+        E[2].x += (dir_2 + dificultad) / 10;
+        E[4].x += (dir_3 + dificultad) / 10;
+
+        E[1].x -= (dir_4 + dificultad) / 10;
+        E[3].x -= (dir_5 + dificultad) / 10;
+        E[5].x -= (dir_6 + dificultad) / 10;
+
+        if(E[0].x > 1620 ){
+            E[0].x = -6000 - distancia;
+        }
+        if(E[2].x > 1620){
+            E[2].x = -2000 - distancia;
+        }
+        if(E[4].x > 1620){
+            E[4].x = -2600 - distancia;
+        }
+
+        if(E[1].x < 0){
+            E[1].x = 3000 + distancia;
+        }
+        if(E[3].x < 0){
+            E[3].x = 4600 + distancia;
+        }
+        if(E[5].x < 0){
+            E[5].x = 1900 + distancia;
+        }
+    }
+}
+
 //---------------------------
 int main(){
     srand(time(NULL));
@@ -303,9 +347,16 @@ int main(){
     BITMAP *estructura = load_bitmap("./img/estructura_juego.bmp", NULL);
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
-
-    //-------------------------
+    //-----------------
     int azar = rand() % 6;
+    float dificultad = 0;
+    float distancia = 1000;
+    float dir_1 = 1 + rand() % 14;
+    float dir_2 = 1 + rand() % 14;
+    float dir_3 = 1 + rand() % 14;
+    float dir_4 = 1 + rand() % 14;
+    float dir_5 = 1 + rand() % 14;
+    float dir_6 = 1 + rand() % 14;
 
     ARMAS N;
     N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 515, 1);
@@ -320,16 +371,20 @@ int main(){
 
     estructuras Edi[7];
     iniciar_estructuras(Edi);
+
     //-------------------------
     while(!key[KEY_ESC]){
         clear_to_color(buffer,0x000000);
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
 
+        mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, dificultad, distancia);
+
         N.pinta(buffer);
-        N.dispara(disparos, buffer);
-        pintar_enemigo(E, buffer);
+        crear_bala_nave(N,disparos,buffer);
 
         pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
+        pintar_enemigo(E, buffer);
+        crear_bala_enemigo(E,azar);
 
         for(int i = 0; i < 6; i++){
                 if(elimina_bala_objeto(N,E[i],disparos)){
@@ -344,11 +399,7 @@ int main(){
         }
         elimina_bala_estructuras(E[azar],Edi,disp_E);
 
-        if(E[azar].n_disp == 0){
-            azar = rand() % 6;
-        }
         E[azar].dispara_E(disp_E, buffer);
-
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
     }
