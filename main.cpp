@@ -345,9 +345,12 @@ int main(){
     BITMAP* estruc_5 = load_bitmap("./img/estruc_5.bmp", NULL);
     BITMAP* estruc_6 = load_bitmap("./img/estruc_6.bmp", NULL);
     BITMAP *estructura = load_bitmap("./img/estructura_juego.bmp", NULL);
+    BITMAP *menu_con = load_bitmap("./img/menu_controles.bmp",NULL);
+    BITMAP *Press_start = load_bitmap("./img/Press_start.bmp",NULL);
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
     //-----------------
+    int cont=0;
     int azar = rand() % 6;
     float dificultad = 0;
     float distancia = 1000;
@@ -373,9 +376,34 @@ int main(){
     iniciar_estructuras(Edi);
 
     //-------------------------
+    bool salida = false;
+            while (!salida){
+            clear_to_color(buffer,0x000000);
+            masked_blit(estructura,buffer,0,0,0,510,1619,495);
+
+            pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
+            pintar_enemigo(E, buffer);
+
+            mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, dificultad, distancia);
+            N.pinta(buffer);
+            masked_blit(menu_con,buffer,0,0,0,0,ANCHO,ALTO);
+
+            if (cont <=150){
+            masked_blit(Press_start,buffer,0,0,440,440,ANCHO,ALTO);
+            }
+            if (cont++ == 300){
+                cont =0;
+            }
+
+            blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
+            if (key[KEY_A] || key[KEY_ESC]){
+                salida=true;
+                }
+            }
     while(!key[KEY_ESC]){
         clear_to_color(buffer,0x000000);
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
+
 
         mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, dificultad, distancia);
 
@@ -385,7 +413,6 @@ int main(){
         pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
         pintar_enemigo(E, buffer);
         crear_bala_enemigo(E,azar);
-
         for(int i = 0; i < 6; i++){
                 if(elimina_bala_objeto(N,E[i],disparos)){
                     explosion_1(E[i], buffer);
