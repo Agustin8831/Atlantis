@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1653689898 source:d:\agusrtin perez\escritorio\proyecto\c++\atlantis\atlantis\main.cpp
+1653870151 source:d:\agusrtin perez\escritorio\proyecto\c++\atlantis\atlantis\main.cpp
 	<allegro.h>
 	<stdlib.h>
 	<iostream>

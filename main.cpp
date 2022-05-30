@@ -132,8 +132,15 @@ void iniciar_estructuras (struct estructuras edificios[]){
 };
 void pintar_estructuras(struct estructuras Edi[],BITMAP* buffer,
                         BITMAP* estruc_1,BITMAP* estruc_2,BITMAP* estruc_3,
-                        BITMAP* estruc_4,BITMAP* estruc_5,BITMAP* estruc_6){
-
+                        BITMAP* estruc_4,BITMAP* estruc_5,BITMAP* estruc_6, int contador){
+    if(contador == 6){
+        Edi[0].dan = 0;
+        Edi[1].dan = 0;
+        Edi[2].dan = 0;
+        Edi[3].dan = 0;
+        Edi[4].dan = 0;
+        Edi[5].dan = 0;
+    }
     if(Edi[0].dan != 1){
         masked_blit(estruc_1,buffer,0,0,148,805,183,57);
     }
@@ -231,12 +238,10 @@ void explosion_2(struct ARMAS N, BITMAP* buffer){
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
     rest(200);
 }
-void crear_bala_enemigo(struct ARMAS E[], int &azar){
+void crear_bala_enemigo(struct ARMAS E[], int &azar, int num_naves_enemigas){
     if(E[azar].n_disp == 0){
-        azar = rand() % 6;
-        while(E[azar].vida == 0){
-            azar = rand() % 6;
-        }
+        azar = rand() % num_naves_enemigas;
+
     }
 }
 void crear_bala_nave(struct ARMAS& N, struct Balas disparos[],BITMAP* buffer){
@@ -283,28 +288,17 @@ int inicia_audio(int izquierda, int derecha){
     }
 	set_volume(izquierda, derecha);
 }
-
-
-bool limites(struct ARMAS E[], int& dir){
-    for(int i = 0; i< 6; i++){
-        if(E[i].x > 520 || E[i].x < 50){
-            dir = -1 * dir;
-            return true;
-        }
-    }
-    return false;
-}
 void mover_enemigos(struct ARMAS E[],
     float dir_1, float dir_2,float dir_3,
-    float dir_4,float dir_5,float dir_6, float dificultad, float distancia){
+    float dir_4,float dir_5,float dir_6, float distancia){
     for(int i = 0; i< 7; i++){
-        E[0].x += (dir_1 + dificultad) / 10 ;
-        E[2].x += (dir_2 + dificultad) / 10;
-        E[4].x += (dir_3 + dificultad) / 10;
+        E[0].x += dir_1 / 10 ;
+        E[2].x += dir_2 / 10;
+        E[4].x += dir_3 / 10;
 
-        E[1].x -= (dir_4 + dificultad) / 10;
-        E[3].x -= (dir_5 + dificultad) / 10;
-        E[5].x -= (dir_6 + dificultad) / 10;
+        E[1].x -= dir_4 / 10;
+        E[3].x -= dir_5 / 10;
+        E[5].x -= dir_6 / 10;
 
         if(E[0].x > 1620 ){
             E[0].x = -6000 - distancia;
@@ -350,21 +344,23 @@ int main(){
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
     //-----------------
+    int contador = 0;
+    int puntos = 0;
+    int naves_enemigas_contador = 0;
+    int velocidad = 3;
+    int num_naves_enemigas = 1;
+
+
     int cont=0;
     int azar = rand() % 6;
     float dificultad = 0;
-    float distancia = 1000;
-    float dir_1 = 1 + rand() % 4;
-    float dir_2 = 1 + rand() % 4;
-    float dir_3 = 1 + rand() % 4;
-    float dir_4 = 1 + rand() % 4;
-    float dir_5 = 1 + rand() % 4;
-    float dir_6 = 1 + rand() % 4;
+    float distancia = 100;
+
 
     ARMAS N;
     N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 515, 1);
 
-    ARMAS E[6];
+    ARMAS E[7];
     acomoda_enemigos(E);
 
     ARMAS Estruc[6];
@@ -382,10 +378,8 @@ int main(){
             clear_to_color(buffer,0x000000);
             masked_blit(estructura,buffer,0,0,0,510,1619,495);
 
-            pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
+            pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6, contador);
             pintar_enemigo(E, buffer);
-
-            mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, dificultad, distancia);
             N.pinta(buffer);
             masked_blit(menu_con,buffer,0,0,0,0,ANCHO,ALTO);
 
@@ -405,20 +399,49 @@ int main(){
         clear_to_color(buffer,0x000000);
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
 
-        mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, dificultad, distancia);
+
 
         N.pinta(buffer);
         crear_bala_nave(N,disparos,buffer);
-
-        pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6);
         pintar_enemigo(E, buffer);
-        crear_bala_enemigo(E,azar);
+        crear_bala_enemigo(E,azar, num_naves_enemigas);
 
+        pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6, contador);
+        // Velocidad de las naves enemiogas
+        float dir_1 = 1 + rand() % velocidad;
+        float dir_2 = 1 + rand() % velocidad;
+        float dir_3 = 1 + rand() % velocidad;
+        float dir_4 = 1 + rand() % velocidad;
+        float dir_5 = 1 + rand() % velocidad;
+        float dir_6 = 1 + rand() % velocidad;
+    mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, distancia);
+        // Eliminador de naves enemigas
         for(int i = 0; i < 6; i++){
-                if(elimina_bala_objeto(N,E[i],disparos)){
-                    explosion_1(E[i], buffer);
-                }
+            if(elimina_bala_objeto(N,E[i],disparos)){
+                explosion_1(E[i], buffer);
+                puntos += 200;
+                naves_enemigas_contador++;
+                contador++;
+            }
         }
+        // Restableciendo las vidas de las naves enemigas
+        if(contador == 6){
+            E[0].vida = 1;
+            E[1].vida = 1;
+            E[2].vida = 1;
+            E[3].vida = 1;
+            E[4].vida = 1;
+            E[5].vida = 1;
+
+            contador = 0;
+            velocidad += 1;
+            num_naves_enemigas++;
+            distancia += 100;
+        }
+        //cout<<num_naves_enemigas;
+        // ------------ Texto
+        textprintf(buffer, font, 1200, 20, palette_color[10],"Naves enemigas destruidas: %d", naves_enemigas_contador);
+        textprintf(buffer, font, 1450, 20, palette_color[10],"Puntaje: %d", puntos);
 
         elimina_bala_estructuras(N,Edi,disparos);
 
