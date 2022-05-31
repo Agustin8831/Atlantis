@@ -3,7 +3,7 @@
 #include <iostream>
 #include <time.h>
 using namespace std;
-
+int estructura_eliminada_contador = 0;
 //---------- Estructuras
 struct Balas{
     int x , y;
@@ -114,7 +114,6 @@ bool elimina_bala_objeto(struct ARMAS& N, struct ARMAS& E, struct Balas B[]){
 //---------- Medida de la Pantalla
 #define ANCHO 1620
 #define ALTO  1000
-
 //----------- Dispara Enemigo
 void ARMAS::dispara_E(struct Balas disparos[], BITMAP* buffer){
         crear_bala(n_disp, max_disp, disparos, x + 80, y + 40, 0, 1);
@@ -168,34 +167,41 @@ void elimina_bala_estructuras(struct ARMAS &N, struct estructuras Edi[], struct 
                 N.ancho_b, N.alto_b) && Edi[0].dan < 1){
                 eliminar(B,N.n_disp,cont);
                 Edi[0].dan++;
+                estructura_eliminada_contador++;
             }
             if(colision(755,570,183,57,B[cont].x, B[cont].y,
                 N.ancho_b, N.alto_b) && Edi[1].dan < 1){
                 eliminar(B,N.n_disp,cont);
                 Edi[1].dan++;
+                estructura_eliminada_contador++;
             }
             if(colision(962,750,183,57,B[cont].x, B[cont].y,
                 N.ancho_b, N.alto_b) && Edi[2].dan < 1){
                 eliminar(B,N.n_disp,cont);
                 Edi[2].dan++;
+                estructura_eliminada_contador++;
             }
             if(colision(1355,638,183,57,B[cont].x, B[cont].y,
                 N.ancho_b, N.alto_b) && Edi[3].dan < 1){
                 eliminar(B,N.n_disp,cont);
                 Edi[3].dan++;
+                estructura_eliminada_contador++;
             }
             if(colision(555,638,183,57,B[cont].x, B[cont].y,
                 N.ancho_b, N.alto_b) && Edi[4].dan < 1){
                 eliminar(B,N.n_disp,cont);
                 Edi[4].dan++;
+                estructura_eliminada_contador++;
             }
             if(colision(370,695,183,57,B[cont].x, B[cont].y,
                 N.ancho_b, N.alto_b) && Edi[5].dan < 1){
                 eliminar(B,N.n_disp,cont);
                 Edi[5].dan++;
+                estructura_eliminada_contador++;
             }
         }
     }
+    cout<<estructura_eliminada_contador<<"  ";
 }
 //---------- Crear y Pintar todos los enemigos
 void acomoda_enemigos(struct ARMAS E[]){
@@ -468,14 +474,16 @@ int main(){
         // Reconstruyendo las estructuras
         if(key[KEY_1] && puntos >= 5000){
             iniciar_estructuras(Edi);
-            puntos -= 5000;
+            puntos = puntos - 5000;
+            estructura_eliminada_contador = 0;
         }
         // ------------ Texto
         textprintf(buffer, font, 1100, 20, palette_color[10],"Nivel: %d", nivel);
         textprintf(buffer, font, 1200, 20, palette_color[10],"Naves enemigas destruidas: %d", naves_enemigas_contador);
         textprintf(buffer, font, 1450, 20, palette_color[10],"Puntaje: %d", puntos);
 
-        elimina_bala_estructuras(N,Edi,disparos);
+        // Terminando el juego
+        if(estructura_eliminada_contador == 6){break;}
 
         if(elimina_bala_objeto(E[azar], N, disp_E)){
             explosion_2(N,buffer);
