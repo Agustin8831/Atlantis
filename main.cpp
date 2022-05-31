@@ -241,7 +241,7 @@ void explosion_2(struct ARMAS N, BITMAP* buffer){
 void crear_bala_enemigo(struct ARMAS E[], int &azar, int num_naves_enemigas){
     if(E[azar].n_disp == 0){
         azar = rand() % num_naves_enemigas;
-
+        while(E[azar].vida == 0){azar = rand() % num_naves_enemigas;}
     }
 }
 void crear_bala_nave(struct ARMAS& N, struct Balas disparos[],BITMAP* buffer){
@@ -279,14 +279,6 @@ void crear_bala_nave(struct ARMAS& N, struct Balas disparos[],BITMAP* buffer){
        //---------- Pintando y Eliminando la bala
         pintar_bala(N.n_disp, N.max_disp, disparos, buffer, N.img_bala, N.ancho_b, N.alto_b);
         elimina_bala(N.n_disp, N.max_disp, disparos, ANCHO, ALTO);
-}
-//---------- Audio
-int inicia_audio(int izquierda, int derecha){
-    if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0) {
-       allegro_message("Error: inicializando sistema de sonido\n%s\n", allegro_error);
-       return 1;
-    }
-	set_volume(izquierda, derecha);
 }
 void mover_enemigos(struct ARMAS E[],
     float dir_1, float dir_2,float dir_3,
@@ -329,7 +321,6 @@ int main(){
     install_keyboard();
     set_color_depth(32);
     set_gfx_mode(GFX_AUTODETECT_WINDOWED, ANCHO, ALTO, 0, 0);
-	inicia_audio(70,70);
 
 	// Estructuras
 	BITMAP* estruc_1 = load_bitmap("./img/estruc_1.bmp", NULL);
@@ -345,11 +336,12 @@ int main(){
 
     //-----------------
     int contador = 0;
-    int puntos = 0;
     int naves_enemigas_contador = 0;
     int velocidad = 3;
     int num_naves_enemigas = 1;
 
+    int puntos = 0;
+    int nivel = 1;
 
     int cont=0;
     int azar = rand() % 6;
@@ -399,14 +391,13 @@ int main(){
         clear_to_color(buffer,0x000000);
         masked_blit(estructura,buffer,0,0,0,510,1619,495);
 
-
-
         N.pinta(buffer);
         crear_bala_nave(N,disparos,buffer);
         pintar_enemigo(E, buffer);
         crear_bala_enemigo(E,azar, num_naves_enemigas);
 
         pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6, contador);
+
         // Velocidad de las naves enemiogas
         float dir_1 = 1 + rand() % velocidad;
         float dir_2 = 1 + rand() % velocidad;
@@ -414,12 +405,43 @@ int main(){
         float dir_4 = 1 + rand() % velocidad;
         float dir_5 = 1 + rand() % velocidad;
         float dir_6 = 1 + rand() % velocidad;
-    mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, distancia);
+        mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, distancia);
         // Eliminador de naves enemigas
         for(int i = 0; i < 6; i++){
             if(elimina_bala_objeto(N,E[i],disparos)){
                 explosion_1(E[i], buffer);
-                puntos += 200;
+
+                switch(nivel)
+                {
+                    case 1:
+                        puntos += 100;
+                    break;
+                    case 2:
+                        puntos += 200;
+                    break;
+                    case 3:
+                        puntos += 300;
+                    break;
+                    case 4:
+                        puntos += 400;
+                    break;
+                    case 5:
+                        puntos += 500;
+                    break;
+                    case 6:
+                        puntos += 600;
+                    break;
+                    case 7:
+                        puntos += 700;
+                    break;
+                    case 8:
+                        puntos += 800;
+                    break;
+                    default:
+                        if(nivel > 8){
+                            puntos += 900;
+                        }
+                }
                 naves_enemigas_contador++;
                 contador++;
             }
@@ -434,12 +456,22 @@ int main(){
             E[5].vida = 1;
 
             contador = 0;
-            velocidad += 1;
-            num_naves_enemigas++;
+            velocidad++;
+            if(num_naves_enemigas < 3){
+                num_naves_enemigas++;
+            }
             distancia += 100;
+            puntos += 1000;
+            nivel++;
+
         }
-        //cout<<num_naves_enemigas;
+        // Reconstruyendo las estructuras
+        if(key[KEY_1] && puntos >= 5000){
+            iniciar_estructuras(Edi);
+            puntos -= 5000;
+        }
         // ------------ Texto
+        textprintf(buffer, font, 1100, 20, palette_color[10],"Nivel: %d", nivel);
         textprintf(buffer, font, 1200, 20, palette_color[10],"Naves enemigas destruidas: %d", naves_enemigas_contador);
         textprintf(buffer, font, 1450, 20, palette_color[10],"Puntaje: %d", puntos);
 
