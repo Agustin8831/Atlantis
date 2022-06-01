@@ -4,6 +4,8 @@
 #include <time.h>
 using namespace std;
 int estructura_eliminada_contador = 0;
+int contador = 0;
+int nivel = 1;
 //---------- Estructuras
 struct Balas{
     int x , y;
@@ -201,26 +203,90 @@ void elimina_bala_estructuras(struct ARMAS &N, struct estructuras Edi[], struct 
             }
         }
     }
-    cout<<estructura_eliminada_contador<<"  ";
 }
 //---------- Crear y Pintar todos los enemigos
 void acomoda_enemigos(struct ARMAS E[]){
     E[0].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-6000,0, 1);
-    E[1].inicia("./img/nave_2.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,3000,70, 1);
-    E[2].inicia("./img/nave_3.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2000,140, 1);
-    E[3].inicia("./img/nave_4.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,4600,210, 1);
-    E[4].inicia("./img/nave_5.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2600,280, 1);
+    E[1].inicia("./img/nave_4.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,4600,210, 1);
+    E[2].inicia("./img/nave_5.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2600,280, 1);
+
+    E[3].inicia("./img/nave_2.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,3000,70, 1);
+    E[4].inicia("./img/nave_3.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2000,140, 1);
     E[5].inicia("./img/nave_6.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1900,350, 1);
 }
 void pintar_enemigo(struct ARMAS E[], BITMAP* buffer){
-    int indice = -1;
-    for(int i = 0; i < 1; i++){
-            for(int j = 0; j < 6; j++){
-                indice++;
-                if(E[indice].vida > 0){
-                    E[indice].pinta(buffer);
-                }
+    if(nivel == 1){
+        if(contador <= 4){
+            if(E[1].vida > 0){
+                E[1].pinta(buffer);
             }
+            if(E[2].vida > 0){
+                E[2].pinta(buffer);
+            }
+            if(E[3].vida > 0){
+                E[3].pinta(buffer);
+            }
+            if(E[4].vida > 0){
+                E[4].pinta(buffer);
+            }
+            if(E[5].vida > 0){
+                E[5].pinta(buffer);
+            }
+        }
+        else{
+            if(E[0].vida > 0){
+                E[0].pinta(buffer);
+            }
+        }
+    }
+    if(nivel == 2){
+        if(contador <= 3){
+            if(E[2].vida > 0){
+                E[2].pinta(buffer);
+            }
+            if(E[3].vida > 0){
+                E[3].pinta(buffer);
+            }
+            if(E[4].vida > 0){
+                E[4].pinta(buffer);
+            }
+            if(E[5].vida > 0){
+                E[5].pinta(buffer);
+            }
+        }
+        else{
+            if(E[0].vida > 0){
+                E[0].pinta(buffer);
+            }
+            if(E[1].vida > 0){
+                E[1].pinta(buffer);
+            }
+        }
+
+    }
+    if(nivel >= 3){
+        if(contador <= 2){
+            if(E[3].vida > 0){
+                E[3].pinta(buffer);
+            }
+            if(E[4].vida > 0){
+                E[4].pinta(buffer);
+            }
+            if(E[5].vida > 0){
+                E[5].pinta(buffer);
+            }
+        }
+        else{
+            if(E[0].vida > 0){
+                E[0].pinta(buffer);
+            }
+            if(E[1].vida > 0){
+                E[1].pinta(buffer);
+            }
+            if(E[2].vida > 0){
+                E[2].pinta(buffer);
+            }
+        }
     }
 }
 
@@ -341,16 +407,15 @@ int main(){
     BITMAP *buffer = create_bitmap(ANCHO, ALTO);
 
     //-----------------
-    int contador = 0;
     int naves_enemigas_contador = 0;
     int velocidad = 3;
     int num_naves_enemigas = 1;
 
     int puntos = 0;
-    int nivel = 1;
 
     int cont=0;
-    int azar = rand() % 6;
+    int azar = rand()%3;
+    int valor = 0;
     float dificultad = 0;
     float distancia = 100;
 
@@ -400,7 +465,6 @@ int main(){
         N.pinta(buffer);
         crear_bala_nave(N,disparos,buffer);
         pintar_enemigo(E, buffer);
-        crear_bala_enemigo(E,azar, num_naves_enemigas);
 
         pintar_estructuras(Edi,buffer,estruc_1,estruc_2,estruc_3,estruc_4,estruc_5,estruc_6, contador);
 
@@ -412,46 +476,115 @@ int main(){
         float dir_5 = 1 + rand() % velocidad;
         float dir_6 = 1 + rand() % velocidad;
         mover_enemigos(E,dir_1,dir_2,dir_3,dir_4,dir_5,dir_6, distancia);
-        // Eliminador de naves enemigas
-        for(int i = 0; i < 6; i++){
-            if(elimina_bala_objeto(N,E[i],disparos)){
-                explosion_1(E[i], buffer);
 
-                switch(nivel)
-                {
-                    case 1:
+        // Eliminador de naves enemigas
+        if(nivel == 1){
+            if(contador <= 5){
+                for(int i = 1; i <= 5; i++){
+                    if(elimina_bala_objeto(N,E[i],disparos)){
+                        explosion_1(E[i], buffer);
+                        naves_enemigas_contador++;
+                        contador++;
                         puntos += 100;
-                    break;
-                    case 2:
-                        puntos += 200;
-                    break;
-                    case 3:
-                        puntos += 300;
-                    break;
-                    case 4:
-                        puntos += 400;
-                    break;
-                    case 5:
-                        puntos += 500;
-                    break;
-                    case 6:
-                        puntos += 600;
-                    break;
-                    case 7:
-                        puntos += 700;
-                    break;
-                    case 8:
-                        puntos += 800;
-                    break;
-                    default:
-                        if(nivel > 8){
-                            puntos += 900;
-                        }
+                    }
                 }
-                naves_enemigas_contador++;
-                contador++;
+                if(elimina_bala_objeto(N,E[0],disparos)){
+                    explosion_1(E[0], buffer);
+                    naves_enemigas_contador++;
+                    contador++;
+                    puntos += 100;
+                }
             }
         }
+        if(nivel == 2){
+            if(contador <= 4){
+                for(int i = 2; i <= 5; i++){
+                    if(elimina_bala_objeto(N,E[i],disparos)){
+                        explosion_1(E[i], buffer);
+                        naves_enemigas_contador++;
+                        contador++;
+                        puntos += 200;
+                    }
+                }
+            }
+            for(int j = 0; j <= 1; j++){
+                if(elimina_bala_objeto(N,E[j],disparos)){
+                    explosion_1(E[j], buffer);
+                    naves_enemigas_contador++;
+                    contador++;
+                    puntos += 200;
+                }
+            }
+        }
+        if(nivel >= 3){
+            if(contador <= 3){
+                for(int i = 3; i <= 5; i++){
+                    if(elimina_bala_objeto(N,E[i],disparos)){
+                        explosion_1(E[i], buffer);
+                        naves_enemigas_contador++;
+                        contador++;
+                        switch(nivel){
+                            case 3:
+                                puntos += 300;
+                            break;
+                            case 4:
+                                puntos += 400;
+                            break;
+                            case 5:
+                                puntos += 500;
+                            break;
+                            case 6:
+                                puntos += 600;
+                            break;
+                            case 7:
+                                puntos += 700;
+                            break;
+                            case 8:
+                                puntos += 800;
+                            break;
+                            default:
+                                if(nivel > 8){
+                                    puntos += 900;
+                                }
+                        }
+                    }
+                }
+            }
+            for(int j = 0; j <= 2; j++){
+                if(elimina_bala_objeto(N,E[j],disparos)){
+                    explosion_1(E[j], buffer);
+                    naves_enemigas_contador++;
+                    contador++;
+                    switch(nivel){
+                        case 3:
+                            puntos += 300;
+                        break;
+                        case 4:
+                            puntos += 400;
+                        break;
+                        case 5:
+                            puntos += 500;
+                        break;
+                        case 6:
+                            puntos += 600;
+                        break;
+                        case 7:
+                            puntos += 700;
+                        break;
+                        case 8:
+                            puntos += 800;
+                        break;
+                        default:
+                            if(nivel > 8){
+                                puntos += 900;
+                            }
+                    }
+                }
+            }
+        }
+        // Puntos por nivel
+
+
         // Restableciendo las vidas de las naves enemigas
         if(contador == 6){
             E[0].vida = 1;
@@ -460,6 +593,12 @@ int main(){
             E[3].vida = 1;
             E[4].vida = 1;
             E[5].vida = 1;
+            E[1].x = 3000;
+            E[3].x = 4600;
+            E[5].x = 1900;
+            E[0].x = -6000;
+            E[2].x = -2000;
+            E[4].x = -2600;
 
             contador = 0;
             velocidad++;
@@ -474,7 +613,7 @@ int main(){
         // Reconstruyendo las estructuras
         if(key[KEY_1] && puntos >= 5000){
             iniciar_estructuras(Edi);
-            puntos = puntos - 5000;
+            puntos -= 5000;
             estructura_eliminada_contador = 0;
         }
         // ------------ Texto
@@ -485,12 +624,13 @@ int main(){
         // Terminando el juego
         if(estructura_eliminada_contador == 6){break;}
 
+        crear_bala_enemigo(E,azar, num_naves_enemigas);
         if(elimina_bala_objeto(E[azar], N, disp_E)){
             explosion_2(N,buffer);
         }
         elimina_bala_estructuras(E[azar],Edi,disp_E);
-
         E[azar].dispara_E(disp_E, buffer);
+
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
     }
