@@ -39,16 +39,20 @@ struct ARMAS{
     SAMPLE * explo_ene;
     SAMPLE * explo_est;
     SAMPLE * subir_nivel;
+    SAMPLE * explo_torr;
+    SAMPLE * regeneracion;
 
     void inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
                 int _ancho_p, int _alto_p,int _x, int _y, int _vida
-                ,char *m_disp,char *m_exp_e,char *m_exp_est, char *m_sub_niv);
+                ,char *m_disp,char *m_exp_e,char *m_exp_est, char *m_sub_niv,
+                char *m_exp_tor, char *m_reg);
     void pinta(BITMAP* buffer);
     void dispara_E(struct Balas disparos[], BITMAP* buffer);
 };
 void ARMAS::inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
                    int _ancho_p, int _alto_p, int _x, int _y, int _vida
-                   ,char *m_disp,char *m_exp_e,char *m_exp_est, char *m_sub_niv){
+                   ,char *m_disp,char *m_exp_e,char *m_exp_est, char *m_sub_niv,
+                   char *m_exp_tor, char *m_reg){
     x = _x; y = _y;
     n_disp = 0; max_disp = 2;
     img_arma = load_bitmap(ruta_arma, NULL);
@@ -62,7 +66,10 @@ void ARMAS::inicia(char* ruta_arma, char* ruta_bala, int _ancho_b, int _alto_b,
     disparo = load_wav(m_disp);
     explo_ene = load_wav(m_exp_e);
     explo_est = load_wav(m_exp_est);
+    explo_torr = load_wav(m_exp_tor);
     subir_nivel = load_wav(m_sub_niv);
+    regeneracion = load_wav(m_reg);
+
 }
 void ARMAS::pinta(BITMAP* buffer){
     masked_blit(img_arma,buffer,0,0,x,y,ancho_p,alto_p);
@@ -242,18 +249,18 @@ void elimina_bala_estructuras(struct ARMAS &N, struct estructuras Edi[], struct 
 void acomoda_enemigos(struct ARMAS E[]){
 
     E[0].inicia("./img/nave_1.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-6000,altura_enemigo_1, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
     E[1].inicia("./img/nave_4.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,4600,altura_enemigo_2, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
     E[2].inicia("./img/nave_5.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2600,altura_enemigo_3, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
 
     E[3].inicia("./img/nave_2.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,3000,altura_enemigo_4, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
     E[4].inicia("./img/nave_3.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,-2000,altura_enemigo_5, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
     E[5].inicia("./img/nave_6.bmp", "./img/Bala2.bmp", 6, 12, 172, 56,1900,altura_enemigo_6, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
 }
 void pintar_enemigo(struct ARMAS E[], BITMAP* buffer){
     if(nivel == 1){
@@ -340,6 +347,7 @@ void explosion_1(struct ARMAS E, BITMAP* buffer){
     masked_blit(E.exp_enem_3, buffer, 0, 0, E.x - 10, E.y, 135, 58);
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
     rest(20);
+    //play_sample(E.explo_torr,100,150,1000,0);
 }
 void explosion_2(struct ARMAS N, BITMAP* buffer){
     BITMAP* parche = create_bitmap(83, 48);
@@ -351,6 +359,7 @@ void explosion_2(struct ARMAS N, BITMAP* buffer){
     blit(buffer,screen, 0, 0, 0, 0, ANCHO, ALTO);
     puntos -= 2000;
     rest(200);
+    play_sample(N.explo_torr,100,150,1000,0);
 }
 void crear_bala_enemigo(struct ARMAS E[], int &azar, int num_naves_enemigas){
     if(E[azar].n_disp == 0){
@@ -481,7 +490,7 @@ int main(){
 
     ARMAS N;
     N.inicia("./img/arma_centro.bmp", "./img/Bala2.bmp", 6, 5, 83, 48, 725, 515, 1,"./audio/disparo.wav"
-                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav");
+                ,"./audio/explo.wav","./audio/explo_2.wav", "./audio/subir_nivel.wav","./audio/explo_4.wav","./audio/regenerar.wav");
 
     ARMAS E[7];
     acomoda_enemigos(E);
@@ -497,6 +506,7 @@ int main(){
      bool salida = false;
      bool control = false;
      bool info = true;
+     bool game_start = true;
 
             while (!salida){
             while (!control){
@@ -515,7 +525,7 @@ int main(){
             if (cont++ == 300){
                 cont =0;
             }
-            if (contt++ > 300){
+            if (contt++ > 100){
                 if (key[KEY_I]){
                 control=true;
                 info = false;
@@ -528,8 +538,8 @@ int main(){
                 destroy_bitmap(buffer);
                 }
             if (key[KEY_A]){
-                    salida =true;
                     control = true;
+                    game_start = false;
                     }
             }
             while (!info){
@@ -546,10 +556,10 @@ int main(){
                     destroy_bitmap(buffer);
                     }
                 if (key[KEY_A]){
-                    salida =true;
                     info = true;
+                    game_start = false;
                     }
-                if (contt++ > 300){
+                if (contt++ > 100){
                     if (key [KEY_I]){
                     info = true;
                     control = false;
@@ -557,12 +567,11 @@ int main(){
                         }
                     }
                 }
-            }
-    while(!key[KEY_ESC]){
-        clear_to_color(buffer,0x000000);
-        if(nivel == 1){
-            if(contador >= 5){
-                if(cont_acom_e_1){
+        while(!game_start){
+            clear_to_color(buffer,0x000000);
+            if(nivel == 1){
+                if(contador >= 5){
+                    if(cont_acom_e_1){
                     altura_enemigo_1 = 0;
                     altura_enemigo_2 = num_medida;
                     altura_enemigo_3 = num_medida;
@@ -664,8 +673,6 @@ int main(){
         for(int i = 0; i < 6; i++){
             if(elimina_bala_objeto(N,E[i],disparos)){
                 explosion_1(E[i], buffer);
-                puntos += 200;
-
                 switch(nivel){
                     case 1:
                         puntos += 100;
@@ -736,6 +743,7 @@ int main(){
         if(key[KEY_1] && puntos >= 5000){
             iniciar_estructuras(Edi);
             estructura_eliminada_contador = 0;
+            play_sample(N.regeneracion,100,150,1000,0);
             if(restar_puntos == 1){
                 puntos -= 5000;
             }
@@ -747,10 +755,50 @@ int main(){
         // ------------ Texto
         textprintf(buffer, font, 1100, 20, palette_color[10],"Nivel: %d", nivel);
         textprintf(buffer, font, 1200, 20, palette_color[10],"Naves enemigas destruidas: %d", naves_enemigas_contador);
-        textprintf(buffer, font, 1450, 20, palette_color[10],"Puntaje: %d", puntos);
+        textprintf(buffer, font, /*1*/450, 20, palette_color[10],"Puntaje: %d", puntos);
 
         // Terminando el juego
-        if(estructura_eliminada_contador == 6){break;}
+        if(estructura_eliminada_contador == 6){
+            control = false;
+            info = true;
+            game_start = true;
+
+            iniciar_estructuras(Edi);
+            estructura_eliminada_contador = 0;
+            play_sample(N.regeneracion,100,150,1000,0);
+
+            velocidad = 3;
+            num_naves_enemigas = 1;
+            naves_enemigas_contador =0;
+
+            cont=0,contt=0;
+            nivel =1;
+            puntos =0;
+            azar = rand()%3;
+            valor = 0;
+            dificultad = 0;
+            distancia = 100;
+            estructura_eliminada_contador = 0;
+
+            E[0].vida = 1;
+            E[1].vida = 1;
+            E[2].vida = 1;
+            E[3].vida = 1;
+            E[4].vida = 1;
+            E[5].vida = 1;
+            E[1].x = 3000;
+            E[3].x = 4600;
+            E[5].x = 1900;
+            E[0].x = -6000;
+            E[2].x = -2000;
+            E[4].x = -2600;
+
+            contador = 0;
+
+            cont_acom_e_1 = true;
+            cont_acom_e_2 = true;
+            acomoda_enemigos(E);
+        }
 
         crear_bala_enemigo(E,azar, num_naves_enemigas);
         if(elimina_bala_objeto(E[azar], N, disp_E)){
@@ -778,6 +826,10 @@ int main(){
 
 
         blit(buffer,screen,0,0,0,0,ANCHO,ALTO);
+        if (key[KEY_ESC]){
+                    destroy_bitmap(buffer);
+                    }
+        }
     }
     destroy_bitmap(buffer);
 	return 0;
